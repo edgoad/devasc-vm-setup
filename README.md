@@ -6,6 +6,9 @@ Create a Hyper-V VM
  - Min 4GB RAM
  - Min 2 CPU
 
+Create user accound `devasc` with password of `Cisco123!`
+Set account to autologin without password
+
 ## Configure Ubuntu
 
 Run the following commands to update the system and install dependencies
@@ -20,7 +23,7 @@ Borrowed from https://github.com/epiecs/devasc-vm-setup
 
 Run the following commands to download and run the devasc playbook
 ```shell
-wget https://raw.githubusercontent.com/edgoad/devasc-vm-setup/devasc.yaml
+wget https://raw.githubusercontent.com/edgoad/devasc-vm-setup/main/devasc.yaml
 ansible-playbook devasc.yaml
 ```
 
