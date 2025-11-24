@@ -18,6 +18,8 @@
     - ciscouser: devasc 
     - ciscopass: Cisco123!
     - ansible_become_password: "{{existing_user_pass}}"
+    - user_home: "/home/devasc"
+    - desktop_path: "{{ user_home }}/Desktop"
     - ubuntuversion: focal
     - user_groups:
       - wireshark
@@ -223,6 +225,85 @@
           Type=Application
           Terminal=false
         mode: '0755'
+    
+    - name: Ensure Desktop folder exists
+      file:
+        path: "{{ desktop_path }}"
+        state: directory
+        owner: devasc
+        group: devasc
+        mode: '0755'
+
+    - name: Shortcut for Home Folder
+      copy:
+        dest: "{{ desktop_path }}/home.desktop"
+        content: |
+          [Desktop Entry]
+          Name=Home
+          Exec=nautilus {{ user_home }}
+          Icon=user-home
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
+    - name: Shortcut for Labs Folder
+      copy:
+        dest: "{{ desktop_path }}/labs.desktop"
+        content: |
+          [Desktop Entry]
+          Name=Labs
+          Exec=nautilus {{ user_home }}/labs
+          Icon=folder
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
+    - name: Shortcut for Terminal
+      copy:
+        dest: "{{ desktop_path }}/terminal.desktop"
+        content: |
+          [Desktop Entry]
+          Name=Terminal
+          Exec=gnome-terminal
+          Icon=utilities-terminal
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
+    - name: Shortcut for VSCode
+      copy:
+        dest: "{{ desktop_path }}/vscode.desktop"
+        content: |
+          [Desktop Entry]
+          Name=Visual Studio Code
+          Exec=code
+          Icon=code
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
+    - name: Shortcut for Chromium
+      copy:
+        dest: "{{ desktop_path }}/chromium.desktop"
+        content: |
+          [Desktop Entry]
+          Name=Chromium
+          Exec=chromium-browser
+          Icon=chromium-browser
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
     
     # Setup to prevent screen from going to sleep
     - name: Disable GNOME idle timeout
