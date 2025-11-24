@@ -48,16 +48,7 @@
         state: present
       with_items: "{{ user_groups }}"
 
-    # - name: Add devasc user
-    #   user:
-    #     name: devasc
-    #     password: "{{ ciscopass | password_hash('sha512') }}"
-    #     groups: "{{user_groups}}"
-    #     state: present
-    #     create_home: yes
-    #     append: yes
-    #     shell: /bin/bash
-    #     home: "/home/devasc"
+
 
     - name: Allow devasc  to run sudo without password
       copy:
@@ -67,12 +58,6 @@
         group: root
         mode: '0440'
 
-    # - name: Enable autologin for devasc  in GDM
-    #   lineinfile:
-    #     path: /etc/gdm3/custom.conf
-    #     regexp: '^#?AutomaticLogin='
-    #     line: 'AutomaticLogin=devasc '
-    #     insertafter: '[daemon]'
 
     - name: Add apt key for docker
       apt_key:
@@ -151,7 +136,6 @@
           - ubuntu-mate-desktop
           - vim
           - vmfs-tools
-          - visual-studio-code
           - wget
           - wireshark
 
@@ -165,6 +149,7 @@
           - drawio
           - postman
           - chromium
+          - code
         state: present
     
     - name: Add vscode extension(s) for devasc
@@ -254,10 +239,10 @@
         content: |
           [Desktop Entry]
           Name=Labs
-          Exec=nautilus {{ user_home }}/labs
           Icon=folder
-          Type=Application
-          Terminal=false
+          Type=Link
+          URL=/home/devasc/labs
+          Icon=user-bookmarks
         mode: '0755'
         owner: devasc
         group: devasc
@@ -282,7 +267,7 @@
         content: |
           [Desktop Entry]
           Name=Visual Studio Code
-          Exec=code
+          Exec=/snap/bin/code
           Icon=code
           Type=Application
           Terminal=false
@@ -292,11 +277,12 @@
 
     - name: Shortcut for Chromium
       copy:
+        s
         dest: "{{ desktop_path }}/chromium.desktop"
         content: |
           [Desktop Entry]
           Name=Chromium
-          Exec=chromium-browser
+          Exec=/snap/bin/chromium-browser
           Icon=chromium-browser
           Type=Application
           Terminal=false
