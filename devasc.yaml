@@ -128,6 +128,7 @@
             - ca-certificates
             - containerd.io
             - curl
+            - dconf-cli
             - docker-ce
             - docker-ce-cli
             - docker-compose-plugin
@@ -155,6 +156,7 @@
             - tcptrace
             - tcptraceroute
             - telnet
+            - ubuntu-mate-desktop
             - vim
             - vmfs-tools
             - visual-studio-code
@@ -197,11 +199,26 @@
             - pyotp
             - requests
             - tabulate
-            - ubuntu-mate-desktop
             - webexteamssdk
             - werkzeug
           state: latest
           extra_args: --break-system-packages
+
+      # Install mate desktop environment and set it as default
+      - name: Install MATE Desktop Environment
+        apt:
+          name: "{{ mate_package }}"
+          state: present
+        notify: Restart GDM
+
+      - name: Set MATE as default session
+        lineinfile:
+          path: /etc/gdm3/custom.conf
+          regexp: '^#?DefaultSession='
+          line: 'DefaultSession=mate.desktop'
+          insertafter: '[daemon]'
+        notify: Restart GDM
+
 
       - name: Create desktop shortcut for Firefox
         copy:
@@ -257,8 +274,37 @@
       #     enabled: yes
       #     state: started
 
+      
+
+      - name: Disable GNOME idle timeout
+        command: >
+          sudo -u {{ ciscouser }} dbus-launch gsettings set org.gnome.desktop.session idle-delay 0
+
+      - name: Disable GNOME power sleep on AC
+        command: >
+          sudo -u {{ ciscouser }} dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+
+      - name: Disable GNOME power sleep on battery
+        command: >
+          sudo -u {{ ciscouser }} dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
+
+      - name: Update systemd logind.conf to ignore lid and idle
+        blockinfile:
+          path: /etc/systemd/logind.conf
+          block: |
+            [Login]
+            HandleLidSwitch=ignore
+            IdleAction=ignore
+        notify: Restart systemd-logind
+
+        handlers:
+          
 
     handlers:
+      - name: Restart systemd-logind
+        service:
+          name: systemd-logind
+          state: restarted
       - name: Apt update
         apt:
           update_cache: true

@@ -20,7 +20,7 @@ Borrowed from https://github.com/epiecs/devasc-vm-setup
 
 Run the following commands to download and run the devasc playbook
 ```shell
-wget https://raw.githubusercontent.com/edgoad/ITVMs/master/IT385_DevASC/devasc.yaml
+wget https://raw.githubusercontent.com/edgoad/devasc-vm-setup/devasc.yaml
 ansible-playbook devasc.yaml
 ```
 
