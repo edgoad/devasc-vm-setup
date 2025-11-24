@@ -149,7 +149,12 @@
           - drawio
           - postman
           - chromium
-          - code
+        state: present
+    
+    - name: Install VSCode classic
+      snap:
+        name: code
+        classic: yes
         state: present
     
     - name: Add vscode extension(s) for devasc
@@ -219,19 +224,13 @@
         group: devasc
         mode: '0755'
 
-    - name: Shortcut for Home Folder
-      copy:
-        dest: "{{ desktop_path }}/home.desktop"
-        content: |
-          [Desktop Entry]
-          Name=Home
-          Exec=nautilus {{ user_home }}
-          Icon=user-home
-          Type=Application
-          Terminal=false
-        mode: '0755'
+    - name: Ensure lab folder exists
+      file:
+        path: "{{ desktop_path }}/labs"
+        state: directory
         owner: devasc
         group: devasc
+        mode: '0755'
 
     - name: Shortcut for Labs Folder
       copy:
@@ -268,7 +267,21 @@
           [Desktop Entry]
           Name=Visual Studio Code
           Exec=/snap/bin/code
-          Icon=code
+          Icon=/snap/code/current/meta/gui/vscode.png
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
+    - name: draw.io Shortcut
+      copy:
+        dest: "{{ desktop_path }}/drawio.desktop"
+        content: |
+          [Desktop Entry]
+          Name=draw.io
+          Exec=/snap/bin/drawio
+          Icon=/snap/drawio/current/meta/gui/icon.png
           Type=Application
           Terminal=false
         mode: '0755'
@@ -277,13 +290,12 @@
 
     - name: Shortcut for Chromium
       copy:
-        s
         dest: "{{ desktop_path }}/chromium.desktop"
         content: |
           [Desktop Entry]
           Name=Chromium
-          Exec=/snap/bin/chromium-browser
-          Icon=chromium-browser
+          Exec=/snap/bin/chromium
+          Icon=/snap/chromium/current/chromium.png
           Type=Application
           Terminal=false
         mode: '0755'
