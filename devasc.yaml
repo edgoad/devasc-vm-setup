@@ -24,14 +24,11 @@
     - user_groups:
       - wireshark
       - docker
-    # - app_dir: /opt/sample-python-api
-    # - repo_url: "https://github.com/nikolayg/sample-python-api.git"
-    # - service_name: sample-python-api
-    # - python_exec: /usr/bin/python3
-
-
   
   tasks:
+    - name: Disable idle delay (set to 0)
+      command: gsettings set org.gnome.desktop.session idle-delay 0
+
     - name: Setting the hostname to {{hostname}}
       hostname:
         name: "{{hostname}}"
@@ -48,8 +45,6 @@
         state: present
       with_items: "{{ user_groups }}"
 
-
-
     - name: Allow devasc  to run sudo without password
       copy:
         dest: "/etc/sudoers.d/devasc" 
@@ -57,7 +52,6 @@
         owner: root
         group: root
         mode: '0440'
-
 
     - name: Add apt key for docker
       apt_key:
@@ -73,14 +67,6 @@
       apt_repository:
         repo: deb https://download.docker.com/linux/ubuntu {{ubuntuversion}} stable
         filename: docker
-        state: present
-      notify:
-        - Apt update
-
-    - name: Add vscode repository
-      apt_repository:
-        repo: deb https://packages.microsoft.com/repos/code stable main
-        filename: vscode
         state: present
       notify:
         - Apt update
@@ -161,6 +147,28 @@
       become: false
       become_user: devasc
       command: code --install-extension ms-python.python
+    # Configure VS Code to disable Copilot
+    - name: Ensure VS Code settings directory exists
+      file:
+        path: "{{ user_home }}/.config/Code/User"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure VS Code settings.json exists with Copilot disabled
+      copy:
+        dest: "{{ user_home }}/.config/Code/User/settings.json"
+        content: |
+          {
+            "github.copilot.agent.enabled": false,
+            "github.copilot.chat.enabled": false,
+            "github.copilot.inlineSuggest.enable": false,
+            "workbench.experimental.enableCopilot": false,
+            "extensions.autoUpdate": false,
+            "extensions.ignoreRecommendations": true,
+            "chat.disableAIFeatures": true
+          }
+        mode: '0644'
+
 
     - name: Install Python packages
       become: false
@@ -325,8 +333,91 @@
           IdleAction=ignore
       notify: Restart systemd-logind
 
+    # Setup IP addresses
+    - name: Write netplan configuration
+      copy:
+        dest: /etc/netplan/01-netcfg.yaml
+        content: |
+          network:
+            version: 2
+            renderer: networkd
+            ethernets:
+              eth:
+                match:
+                  name: e*
+                dhcp4: yes
+            bridges:
+              dummy0:
+                dhcp4: no
+                dhcp6: no
+                accept-ra: no
+                interfaces: []
+                addresses:
+                  - 192.168.2.1/32 # library.demo.local
+                  - 192.168.2.2/32 # pt-controller.demo.local
+                  - 192.168.2.3/32 # TBD
+                  - 192.168.2.4/32 # TBD
+                  - 192.168.2.5/32 # TBD
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Apply netplan
+    
+    - name: Ensure host entries exist
+      lineinfile:
+        path: /etc/hosts
+        create: yes
+        line: "{{ item }}"
+      loop:
+        - "192.168.2.1 library.demo.local"
+        - "192.168.2.2 pt-controller.demo.local"
 
-        
+
+    # Setup API-SIMULATOR service
+    - name: Copy API-SIMULATOR directory
+      copy:
+        src: "{{ user_home }}/devasc-vm-setup/API-SIMULATOR"
+        dest: /opt/API-SIMULATOR
+        owner: root
+        group: root
+
+    - name: Create systemd service file for API-SIMULATOR
+      copy:
+        dest: /etc/systemd/system/api-simulator.service
+        content: |
+          [Unit]
+          Description=API Simulator Flask App
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/opt/API-SIMULATOR/start-API-SIMULATOR.sh
+          WorkingDirectory=/opt/API-SIMULATOR
+          Restart=always
+          User=www-data
+          Environment="PATH=/usr/local/bin:/usr/bin"
+          Environment="PYTHONUNBUFFERED=1"
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Reload systemd
+        - Restart API-SIMULATOR
+
+    - name: Enable API-SIMULATOR service
+      systemd:
+        name: api-simulator.service
+        enabled: yes
+        state: started
+
+    # Setup lab folder
+    - name: Copy labs directory
+      copy:
+        src: "{{ user_home }}/devasc-vm-setup/labs"
+        dest: "{{ user_home }}/labs"
 
   handlers:
     - name: Restart systemd-logind
@@ -340,3 +431,12 @@
       service:
         name: gdm3
         state: restarted
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Restart API-SIMULATOR
+      systemd:
+        name: api-simulator.service
+        state: restarted
+    - name: Apply netplan
+      command: netplan apply
