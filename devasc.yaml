@@ -282,6 +282,20 @@
         owner: devasc
         group: devasc
 
+    - name: Shortcut for postman
+      copy:
+        dest: "{{ desktop_path }}/postman.desktop"
+        content: |
+          [Desktop Entry]
+          Name=Postman
+          Exec=/snap/bin/postman
+          Icon=/snap/postman/current/usr/share/postman/icons/icon_128x128.png
+          Type=Application
+          Terminal=false
+        mode: '0755'
+        owner: devasc
+        group: devasc
+
     - name: draw.io Shortcut
       copy:
         dest: "{{ desktop_path }}/drawio.desktop"
