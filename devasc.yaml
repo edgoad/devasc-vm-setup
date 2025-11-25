@@ -388,13 +388,40 @@
 
 
     # Setup API-SIMULATOR service
-    - name: Copy API-SIMULATOR directory
-      copy:
-        src: "{{ user_home }}/devasc-vm-setup/API-SIMULATOR"
-        dest: /opt/API-SIMULATOR
-        owner: root
-        group: root
+    - name: Ensure required packages for PPA are installed
+      apt:
+        name: software-properties-common
+        state: present
+        update_cache: yes
 
+    - name: Add Deadsnakes PPA
+      apt_repository:
+        repo: ppa:deadsnakes/ppa
+        state: present
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Python 3.8 and venv tools
+      apt:
+        name:
+          - python3.8
+          - python3.8-venv
+          - python3.8-dev
+        state: present
+
+    - name: Copy API-SIMULATOR directory
+      command: cp -r "{{ user_home }}/devasc-vm-setup/API-SIMULATOR" /opt/
+        
+    - name: Create Python virtual environment for API-SIMULATOR
+      command: python3.8 -m venv /opt/API-SIMULATOR/venv
+
+    - name: Install API-SIMULATOR requirements
+      pip:
+        requirements: /opt/API-SIMULATOR/requirements.txt
+        virtualenv: /opt/API-SIMULATOR/venv
+    
     - name: Create systemd service file for API-SIMULATOR
       copy:
         dest: /etc/systemd/system/api-simulator.service
@@ -427,11 +454,32 @@
         enabled: yes
         state: started
 
+
+    - name: Ensure managed policies directory exists
+      file:
+        path: /etc/chromium/policies/managed
+        state: directory
+        mode: '0755'
+
+    - name: Set homepage policy
+      copy:
+        dest: /etc/chromium/policies/managed/homepage.json
+        content: |
+          {
+            "HomepageLocation": "http://library.demo.local",
+            "HomepageIsNewTabPage": false,
+            "RestoreOnStartup": 4,
+            "RestoreOnStartupURLs": ["http://library.demo.local"]
+          }
+        owner: root
+        group: root
+        mode: '0644'
+
     # Setup lab folder
     - name: Copy labs directory
       copy:
         src: "{{ user_home }}/devasc-vm-setup/labs"
-        dest: "{{ user_home }}/labs"
+        dest: "{{ user_home }}"
 
   handlers:
     - name: Restart systemd-logind
