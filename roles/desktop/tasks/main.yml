@@ -141,19 +141,24 @@
     group: devasc
 
 
-- name: Disable GNOME idle timeout for user
-  become: false
-  become_user: "{{ existing_user }}"
-  shell: dbus-launch gsettings set org.gnome.desktop.session idle-delay 0
-  args:
-    warn: false
-  ignore_errors: yes
+# Setup to prevent screen from going to sleep
+- name: Disable GNOME idle timeout
+  command: >
+    sudo -u devasc dbus-launch gsettings set org.gnome.desktop.session idle-delay 0
 
-- name: Disable GNOME power sleep on AC for user
-  become: false
-  become_user: "{{ existing_user }}"
-  shell: dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
-  args:
-    warn: false
-  ignore_errors: yes
+- name: Disable GNOME power sleep on AC
+  command: >
+    sudo -u devasc dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
 
+- name: Disable GNOME power sleep on battery
+  command: >
+    sudo -u devasc dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
+
+- name: Update systemd logind.conf to ignore lid and idle
+  blockinfile:
+    path: /etc/systemd/logind.conf
+    block: |
+      [Login]
+      HandleLidSwitch=ignore
+      IdleAction=ignore
+  notify: Restart systemd-logind
