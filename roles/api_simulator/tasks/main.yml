@@ -1,0 +1,67 @@
+---
+- name: Ensure required packages for PPA are installed
+  apt:
+    name: software-properties-common
+    state: present
+    update_cache: yes
+
+- name: Add Deadsnakes PPA
+  apt_repository:
+    repo: ppa:deadsnakes/ppa
+    state: present
+  notify: apt_update
+
+- name: Install Python 3.8 and venv tools
+  apt:
+    name:
+      - python3.8
+      - python3.8-venv
+      - python3.8-dev
+    state: present
+
+- name: Copy API-SIMULATOR directory to /opt
+  command: cp -r "{{ user_home }}/devasc-vm-setup/API-SIMULATOR" /opt/
+  args:
+    creates: /opt/API-SIMULATOR
+
+- name: Create Python virtual environment for API-SIMULATOR
+  command: python3.8 -m venv /opt/API-SIMULATOR/venv
+  args:
+    creates: /opt/API-SIMULATOR/venv/bin/activate
+
+- name: Install API-SIMULATOR requirements
+  pip:
+    requirements: /opt/API-SIMULATOR/requirements.txt
+    virtualenv: /opt/API-SIMULATOR/venv
+
+- name: Create systemd service file for API-SIMULATOR
+  copy:
+    dest: /etc/systemd/system/api-simulator.service
+    content: |
+      [Unit]
+      Description=API Simulator Flask App
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/opt/API-SIMULATOR/start-API-SIMULATOR.sh
+      WorkingDirectory=/opt/API-SIMULATOR
+      Restart=always
+      User=root
+      Environment="PATH=/usr/local/bin:/usr/bin"
+      Environment="PYTHONUNBUFFERED=1"
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload_systemd
+    - Restart API-SIMULATOR
+
+- name: Ensure API-SIMULATOR service enabled and started
+  systemd:
+    name: api-simulator.service
+    enabled: yes
+    state: started

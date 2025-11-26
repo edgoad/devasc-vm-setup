@@ -1,0 +1,75 @@
+---
+- name: Install VS Code extension(s) for devasc (as user)
+  become: false
+  become_user: "{{ existing_user }}"
+  command: code --install-extension ms-python.python
+  ignore_errors: yes
+
+- name: Ensure VS Code settings directory exists
+  file:
+    path: "{{ user_home }}/.config/Code/User"
+    state: directory
+    mode: '0755'
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+
+- name: Ensure VS Code settings.json exists with Copilot disabled
+  copy:
+    dest: "{{ user_home }}/.config/Code/User/settings.json"
+    content: |
+      {
+        "github.copilot.agent.enabled": false,
+        "github.copilot.chat.enabled": false,
+        "github.copilot.inlineSuggest.enable": false,
+        "workbench.experimental.enableCopilot": false,
+        "extensions.autoUpdate": false,
+        "extensions.ignoreRecommendations": true,
+        "chat.disableAIFeatures": true
+      }
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+    mode: '0644'
+
+- name: Create desktop shortcut for Firefox
+  copy:
+    dest: "{{ desktop_path }}/firefox.desktop"
+    content: |
+      [Desktop Entry]
+      Name=Firefox
+      Exec=firefox
+      Icon=firefox
+      Type=Application
+      Terminal=false
+    mode: '0755'
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+
+- name: Create other desktop shortcuts
+  copy:
+    dest: "{{ desktop_path }}/vscode.desktop"
+    content: |
+      [Desktop Entry]
+      Name=Visual Studio Code
+      Exec=/snap/bin/code
+      Icon=/snap/code/current/meta/gui/vscode.png
+      Type=Application
+      Terminal=false
+    mode: '0755'
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+
+- name: Disable GNOME idle timeout for user
+  become: false
+  become_user: "{{ existing_user }}"
+  shell: dbus-launch gsettings set org.gnome.desktop.session idle-delay 0
+  args:
+    warn: false
+  ignore_errors: yes
+
+- name: Disable GNOME power sleep on AC for user
+  become: false
+  become_user: "{{ existing_user }}"
+  shell: dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+  args:
+    warn: false
+  ignore_errors: yes

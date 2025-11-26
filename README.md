@@ -45,3 +45,24 @@ default/desktop icons
     packet tracer
     browser home page
 firewall rules
+
+
+
+
+This repository uses a role-based Ansible layout instead of a single large playbook.
+
+How it's organized:
+- site.yml - top-level play that composes roles
+- roles/common - hostname, common defaults and handlers
+- roles/users - groups, sudoers, user-related items
+- roles/packages - apt, snap, apt keys, repositories
+- roles/desktop - desktop environment, gsettings, shortcuts, VSCode config
+- roles/netplan - network configuration (uses template)
+- roles/api_simulator - API-SIMULATOR service setup
+
+Run:
+- ansible-playbook site.yml -K
+
+Tips:
+- Use group_vars/all.yml or pass -e to override defaults like hostname, user_home, ubuntuversion.
+- Run portions by tags or by limiting roles: ansible-playbook site.yml --tags "packages" or remove roles you don't want from site.yml temporarily.

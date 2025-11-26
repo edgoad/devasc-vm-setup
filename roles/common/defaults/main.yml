@@ -1,0 +1,6 @@
+---
+# common defaults: override in group_vars/all.yml or with -e
+hostname: labvm
+existing_user: devasc
+user_home: "/home/{{ existing_user }}"
+ubuntuversion: focal

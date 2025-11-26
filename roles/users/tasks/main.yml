@@ -1,0 +1,28 @@
+---
+- name: Create necessary groups
+  group:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ user_groups }}"
+
+- name: Ensure devasc can sudo without password
+  copy:
+    dest: "/etc/sudoers.d/{{ existing_user }}"
+    content: "{{ existing_user }} ALL=(ALL) NOPASSWD:ALL"
+    owner: root
+    group: root
+    mode: '0440'
+
+- name: Ensure Desktop folder exists
+  file:
+    path: "{{ desktop_path }}"
+    state: directory
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+    mode: '0755'
+
+- name: Copy labs directory (if present in repo checkout)
+  copy:
+    src: "{{ user_home }}/devasc-vm-setup/labs"
+    dest: "{{ user_home }}"
+  ignore_errors: yes

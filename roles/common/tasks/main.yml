@@ -1,0 +1,28 @@
+---
+- name: Set hostname
+  hostname:
+    name: "{{ hostname }}"
+
+- name: Ensure /etc/hosts has hostname entry
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^(127\.0\.1\.1\s+).*'
+    line: "127.0.1.1   {{ hostname }}"
+
+- name: Disable idle delay systemwide (try global setting)
+  command: gsettings set org.gnome.desktop.session idle-delay 0
+  ignore_errors: yes
+
+# Add commonly used apt keys (can be extended by packages role)
+- name: Add apt key for docker
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add apt key for vscode
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+# trigger an apt update handler if needed
+- meta: flush_handlers

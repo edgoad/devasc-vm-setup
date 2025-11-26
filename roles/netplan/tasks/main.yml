@@ -1,0 +1,18 @@
+---
+- name: Deploy netplan configuration
+  template:
+    src: 01-netcfg.yaml.j2
+    dest: /etc/netplan/01-netcfg.yaml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: apply_netplan
+
+- name: Ensure host entries exist
+  lineinfile:
+    path: /etc/hosts
+    create: yes
+    line: "{{ item }}"
+  loop:
+    - "192.0.2.1 library.demo.local"
+    - "192.0.2.2 pt-controller.demo.local"

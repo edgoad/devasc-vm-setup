@@ -1,0 +1,71 @@
+---
+- name: Remove nosnap.pref so we can install snapd
+  file:
+    path: /etc/apt/preferences.d/nosnap.pref
+    state: absent
+
+- name: Add docker apt repository
+  apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu {{ ubuntuversion }} stable"
+    filename: docker
+    state: present
+  notify: apt_update
+
+- name: Install main apt packages
+  apt:
+    name:
+      - ansible
+      - apt-transport-https
+      - ca-certificates
+      - containerd.io
+      - curl
+      - dconf-cli
+      - docker-ce
+      - docker-ce-cli
+      - docker-compose-plugin
+      - git
+      - gnupg
+      - htop
+      - inetutils-traceroute
+      - lsb-release
+      - mc
+      - neofetch
+      - net-tools
+      - open-vm-tools
+      - open-vm-tools-desktop
+      - openssh-server
+      - python3
+      - python3-pip
+      - python3-venv
+      - snapd
+      - snapd-xdg-open
+      - software-properties-common
+      - sqlitebrowser
+      - sshpass
+      - stunnel4
+      - tcpdump
+      - tcptrace
+      - tcptraceroute
+      - telnet
+      - ubuntu-mate-desktop
+      - vim
+      - vmfs-tools
+      - wget
+      - wireshark
+    state: latest
+    update_cache: yes
+  notify: apt_update
+
+- name: Install snap packages
+  snap:
+    name:
+      - drawio
+      - postman
+      - chromium
+    state: present
+
+- name: Install code (classic) snap
+  snap:
+    name: code
+    classic: yes
+    state: present

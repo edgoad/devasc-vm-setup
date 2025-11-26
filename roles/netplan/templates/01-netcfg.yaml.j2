@@ -1,0 +1,20 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth:
+      match:
+        name: e*
+      dhcp4: yes
+  bridges:
+    dummy0:
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+      interfaces: []
+      addresses:
+        - 192.0.2.1/32 # library.demo.local
+        - 192.0.2.2/32 # pt-controller.demo.local
+        - 192.0.2.3/32 # TBD
+        - 192.0.2.4/32 # TBD
+        - 192.0.2.5/32 # TBD
