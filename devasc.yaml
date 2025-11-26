@@ -321,26 +321,6 @@
         owner: devasc
         group: devasc
 
-    - name: Set Chromium as default browser using update-alternatives
-      become: yes
-      command: update-alternatives --install /usr/bin/x-www-browser x-www-browser /snap/bin/chromium 200
-
-    - name: Select Chromium as default browser
-      become: yes
-      command: update-alternatives --set x-www-browser /snap/bin/chromium
-
-    - name: Ensure Chromium Preferences file exists
-      file:
-        path: "{{ user_home }}/.config/chromium/Default/Preferences"
-        state: touch
-
-    - name: Update homepage in Preferences
-      lineinfile:
-        path: "{{ user_home }}/.config/chromium/Default/Preferences"
-        regexp: '"homepage":'
-        line: '"homepage": "http://library.demo.local",'
-      notify: Restart Chromium
-
 
     # Setup to prevent screen from going to sleep
     - name: Disable GNOME idle timeout
