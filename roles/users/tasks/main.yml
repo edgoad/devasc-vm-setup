@@ -27,4 +27,7 @@
     dest: "{{ user_home }}"
   ignore_errors: yes
 
-
+- name: Remove keyring files
+  file:
+    path: "{{ user_home }}/.local/share/keyrings"
+    state: absent

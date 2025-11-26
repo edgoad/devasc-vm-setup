@@ -48,18 +48,6 @@
   notify: Restart GDM
 
 # Create desktop shortcuts
-- name: Create desktop shortcut for Firefox
-  copy:
-    dest: "/home/devasc/Desktop/firefox.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Firefox
-      Exec=firefox
-      Icon=firefox
-      Type=Application
-      Terminal=false
-    mode: '0755'
-
 - name: Ensure Desktop folder exists
   file:
     path: "{{ desktop_path }}"
@@ -70,7 +58,7 @@
 
 - name: Shortcut for Labs Folder
   copy:
-    dest: "{{ user_home }}/labs.desktop"
+    dest: "{{ desktop_path }}/labs.desktop"
     content: |
       [Desktop Entry]
       Name=Labs
