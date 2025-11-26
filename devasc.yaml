@@ -176,6 +176,20 @@
         dest: "{{ user_home }}/PacketTracer.deb"
         mode: '0644'
 
+    - name: Extract dependencies
+      command: "dpkg-deb -I {{ user_home }}/PacketTracer.deb"
+      register: deb_info
+
+    - name: Parse dependencies
+      set_fact:
+        deb_dependencies: "{{ deb_info.stdout | regex_search('Depends: (.*)', '\\1') | regex_replace(',','') | regex_replace('\\([^)]*\\)','') | split(' ') }}"
+
+    - name: Install dependencies
+      apt:
+        name: "{{ deb_dependencies }}"
+        state: present
+        update_cache: yes
+
     - name: Install .deb package
       apt:
         deb: "{{ user_home }}/PacketTracer.deb"

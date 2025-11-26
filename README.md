@@ -43,4 +43,5 @@ default/desktop icons
     ! draw.io
     ! home folder
     packet tracer
+    browser home page
 firewall rules
