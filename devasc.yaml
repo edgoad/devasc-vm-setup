@@ -169,33 +169,6 @@
           }
         mode: '0644'
 
-    # Install packet tracer .deb package
-    - name: Download packet tracer .deb file
-      get_url:
-        url: "https://www.netacad.com/authoring-resources/courses/ff9e491c-49be-4734-803e-a79e6e83dab1/c3636211-1ce6-4f92-8a22-ccddf902dd72/en-US/assets/PacketTracer822_amd64_signed_en-US_35234a27-3127-49bc-91ce-2926af76f07a.deb"
-        dest: "{{ user_home }}/PacketTracer.deb"
-        mode: '0644'
-
-    - name: Extract dependencies
-      command: "dpkg-deb -I {{ user_home }}/PacketTracer.deb"
-      register: deb_info
-
-    - name: Parse dependencies
-      set_fact:
-        deb_dependencies: "{{ deb_info.stdout | regex_search('Depends: (.*)', '\\1') | regex_replace(',','') | regex_replace('\\([^)]*\\)','') | split(' ') }}"
-
-    - name: Install dependencies
-      apt:
-        name: "{{ deb_dependencies }}"
-        state: present
-        update_cache: yes
-
-    - name: Install .deb package
-      apt:
-        deb: "{{ user_home }}/PacketTracer.deb"
-        state: present
-
-
     - name: Install Python packages
       become: false
       become_user: devasc
@@ -219,6 +192,12 @@
           - werkzeug
         state: latest
         extra_args: --break-system-packages
+
+    # Setup lab folder
+    - name: Copy labs directory
+      copy:
+        src: "{{ user_home }}/devasc-vm-setup/labs"
+        dest: "{{ user_home }}"
 
     # Install mate desktop environment and set it as default
     - name: Install MATE Desktop Environment
@@ -258,23 +237,15 @@
         group: devasc
         mode: '0755'
 
-    - name: Ensure lab folder exists
-      file:
-        path: "{{ desktop_path }}/labs"
-        state: directory
-        owner: devasc
-        group: devasc
-        mode: '0755'
-
     - name: Shortcut for Labs Folder
       copy:
-        dest: "{{ desktop_path }}/labs.desktop"
+        dest: "{{ user_home }}/labs.desktop"
         content: |
           [Desktop Entry]
           Name=Labs
           Icon=folder
           Type=Link
-          URL=/home/devasc/labs
+          URL="{{ user_home }}/labs"
           Icon=user-bookmarks
         mode: '0755'
         owner: devasc
@@ -338,7 +309,7 @@
 
     - name: Shortcut for Chromium
       copy:
-        dest: "{{ desktop_path }}/chromium.desktop"
+        dest: "{{ desktop_path }}/chromium_chromium.desktop"
         content: |
           [Desktop Entry]
           Name=Chromium
@@ -350,7 +321,24 @@
         owner: devasc
         group: devasc
 
-    
+
+    - name: Set default browser using xdg-settings
+      command: xdg-settings set default-web-browser chromium_chromium.desktop
+
+
+    - name: Ensure Chromium Preferences file exists
+      file:
+        path: "{{ user_home }}/.config/chromium/Default/Preferences"
+        state: touch
+
+    - name: Update homepage in Preferences
+      lineinfile:
+        path: "{{ user_home }}/.config/chromium/Default/Preferences"
+        regexp: '"homepage":'
+        line: '"homepage": "http://library.demo.local",'
+      notify: Restart Chromium
+
+
     # Setup to prevent screen from going to sleep
     - name: Disable GNOME idle timeout
       command: >
@@ -463,7 +451,7 @@
           ExecStart=/opt/API-SIMULATOR/start-API-SIMULATOR.sh
           WorkingDirectory=/opt/API-SIMULATOR
           Restart=always
-          User=www-data
+          User=root
           Environment="PATH=/usr/local/bin:/usr/bin"
           Environment="PYTHONUNBUFFERED=1"
 
@@ -503,11 +491,6 @@
         group: root
         mode: '0644'
 
-    # Setup lab folder
-    - name: Copy labs directory
-      copy:
-        src: "{{ user_home }}/devasc-vm-setup/labs"
-        dest: "{{ user_home }}"
 
   handlers:
     - name: Restart systemd-logind
