@@ -35,12 +35,12 @@ Other docker images/services
 ! draw.io
 ubuntuversion?
 default/desktop icons
-    VSCode
-    postman
+    ! VSCode
+    ! postman
     labs folder
-    terminal
-    chromium
-    draw.io
-    home folder
+    ! terminal
+    ! chromium
+    ! draw.io
+    ! home folder
     packet tracer
 firewall rules

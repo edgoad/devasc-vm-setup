@@ -76,13 +76,6 @@
         path: /etc/apt/preferences.d/nosnap.pref
         state: absent
 
-    - name: Update ubuntu packages [please wait]
-      apt:
-        name: "*"
-        state: latest
-        cache_valid_time: 3600
-        update_cache: yes
-
     - name: Install main software packages [please wait]
       apt:
         name:
@@ -125,6 +118,13 @@
           - wget
           - wireshark
 
+        state: latest
+        cache_valid_time: 3600
+        update_cache: yes
+
+    - name: Update ubuntu packages [please wait]
+      apt:
+        name: "*"
         state: latest
         cache_valid_time: 3600
         update_cache: yes
@@ -367,11 +367,11 @@
                 accept-ra: no
                 interfaces: []
                 addresses:
-                  - 192.168.2.1/32 # library.demo.local
-                  - 192.168.2.2/32 # pt-controller.demo.local
-                  - 192.168.2.3/32 # TBD
-                  - 192.168.2.4/32 # TBD
-                  - 192.168.2.5/32 # TBD
+                  - 192.0.2.1/32 # library.demo.local
+                  - 192.0.2.2/32 # pt-controller.demo.local
+                  - 192.0.2.3/32 # TBD
+                  - 192.0.2.4/32 # TBD
+                  - 192.0.2.5/32 # TBD
         owner: root
         group: root
         mode: '0644'
@@ -383,8 +383,8 @@
         create: yes
         line: "{{ item }}"
       loop:
-        - "192.168.2.1 library.demo.local"
-        - "192.168.2.2 pt-controller.demo.local"
+        - "192.0.2.1 library.demo.local"
+        - "192.0.2.2 pt-controller.demo.local"
 
 
     # Setup API-SIMULATOR service
@@ -416,6 +416,8 @@
         
     - name: Create Python virtual environment for API-SIMULATOR
       command: python3.8 -m venv /opt/API-SIMULATOR/venv
+      args:
+        creates: /opt/API-SIMULATOR/venv/bin/activate
 
     - name: Install API-SIMULATOR requirements
       pip:
