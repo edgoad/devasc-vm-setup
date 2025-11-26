@@ -321,10 +321,13 @@
         owner: devasc
         group: devasc
 
+    - name: Set Chromium as default browser using update-alternatives
+      become: yes
+      command: update-alternatives --install /usr/bin/x-www-browser x-www-browser /snap/bin/chromium 200
 
-    - name: Set default browser using xdg-settings
-      command: xdg-settings set default-web-browser chromium_chromium.desktop
-
+    - name: Select Chromium as default browser
+      become: yes
+      command: update-alternatives --set x-www-browser /snap/bin/chromium
 
     - name: Ensure Chromium Preferences file exists
       file:
@@ -470,26 +473,6 @@
         enabled: yes
         state: started
 
-
-    - name: Ensure managed policies directory exists
-      file:
-        path: /etc/chromium/policies/managed
-        state: directory
-        mode: '0755'
-
-    - name: Set homepage policy
-      copy:
-        dest: /etc/chromium/policies/managed/homepage.json
-        content: |
-          {
-            "HomepageLocation": "http://library.demo.local",
-            "HomepageIsNewTabPage": false,
-            "RestoreOnStartup": 4,
-            "RestoreOnStartupURLs": ["http://library.demo.local"]
-          }
-        owner: root
-        group: root
-        mode: '0644'
 
 
   handlers:
