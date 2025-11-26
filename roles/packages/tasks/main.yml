@@ -56,6 +56,13 @@
     update_cache: yes
   notify: apt_update
 
+- name: Update ubuntu packages [please wait]
+  apt:
+    name: "*"
+    state: latest
+    cache_valid_time: 3600
+    update_cache: yes
+
 - name: Install snap packages
   snap:
     name:
@@ -69,3 +76,27 @@
     name: code
     classic: yes
     state: present
+
+- name: Install Python packages
+  become: false
+  become_user: devasc
+  pip:
+    name:
+      - faker
+      - flask
+      - flask_restplus
+      - ncclient
+      - netmiko
+      - pep8
+      - pip
+      - pipenv
+      - pyang
+      - pyats[full]
+      - pylint
+      - pyotp
+      - requests
+      - tabulate
+      - webexteamssdk
+      - werkzeug
+    state: latest
+    extra_args: --break-system-packages

@@ -14,3 +14,25 @@
   command: netplan apply
 - name: reload_systemd
   command: systemctl daemon-reload
+
+
+- name: Restart systemd-logind
+  service:
+    name: systemd-logind
+    state: restarted
+- name: Apt update
+  apt:
+    update_cache: true
+- name: Restart GDM
+  service:
+    name: gdm3
+    state: restarted
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Restart API-SIMULATOR
+  systemd:
+    name: api-simulator.service
+    state: restarted
+- name: Apply netplan
+  command: netplan apply

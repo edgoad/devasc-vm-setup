@@ -26,3 +26,5 @@
     src: "{{ user_home }}/devasc-vm-setup/labs"
     dest: "{{ user_home }}"
   ignore_errors: yes
+
+
