@@ -162,3 +162,17 @@
       HandleLidSwitch=ignore
       IdleAction=ignore
   notify: Restart systemd-logind
+
+
+- name: Copy mate-panel.conf to target
+  copy:
+    src: mate-panel.conf
+    dest: /tmp/mate-panel.conf
+
+- name: Load MATE panel configuration
+  command: dconf load /org/mate/panel/ < /tmp/mate-panel.conf
+
+- name: Restart MATE panel
+  command: mate-panel --replace
+  async: 10
+  poll: 0
