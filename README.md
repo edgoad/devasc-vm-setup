@@ -15,7 +15,8 @@ Run the following commands to update the system and install dependencies
 
 ```shell
 sudo apt update ; sudo apt upgrade -y ; sudo apt autoremove
-sudo apt install openssh-server ansible python3-pip -y
+sudo apt install ansible git -y
+git clone https://www.github.com/egoad/devasc-vm-setup.git
 ```
 ## Run Ansible script
 
@@ -23,8 +24,7 @@ Borrowed from https://github.com/epiecs/devasc-vm-setup
 
 Run the following commands to download and run the devasc playbook
 ```shell
-wget https://raw.githubusercontent.com/edgoad/devasc-vm-setup/main/devasc.yaml
-ansible-playbook devasc.yaml
+ansible-playbook devasc-vm-setup/site.yml
 ```
 
 # Unsure items
@@ -37,7 +37,7 @@ ubuntuversion?
 default/desktop icons
     ! VSCode
     ! postman
-    labs folder
+    ! labs folder
     ! terminal
     ! chromium
     ! draw.io

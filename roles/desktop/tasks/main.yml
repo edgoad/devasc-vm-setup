@@ -64,7 +64,7 @@
       Name=Labs
       Icon=folder
       Type=Link
-      URL="{{ user_home }}/labs"
+      URL={{ user_home }}/labs
       Icon=user-bookmarks
     mode: '0755'
     owner: devasc
@@ -170,6 +170,7 @@
     dest: /tmp/mate-panel.conf
 
 - name: Load MATE panel configuration
+  ignore_errors: yes
   command: dconf load /org/mate/panel/ < /tmp/mate-panel.conf
 
 - name: Restart MATE panel
