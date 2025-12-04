@@ -74,89 +74,10 @@
     var: gio_trust
 
 
-# - name: Shortcut for Labs Folder
-#   copy:
-#     dest: "{{ desktop_path }}/labs.desktop"
-#     content: |
-#       [Desktop Entry]
-#       Name=Labs
-#       Icon=folder
-#       Type=Link
-#       URL={{ user_home }}/labs
-#       Icon=user-bookmarks
-#     mode: '0755'
-#     owner: devasc
-#     group: devasc
+# Update favorite apps in GNOME
+- name: Update favorite apps in GNOME
+  command: gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'chromium_chromium.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'code_code.desktop', 'drawio_drawio.desktop']"
 
-# - name: Shortcut for Terminal
-#   copy:
-#     dest: "{{ desktop_path }}/terminal.desktop"
-#     content: |
-#       [Desktop Entry]
-#       Name=Terminal
-#       Exec=gnome-terminal
-#       Icon=utilities-terminal
-#       Type=Application
-#       Terminal=false
-#     mode: '0755'
-#     owner: devasc
-#     group: devasc
-
-# - name: Shortcut for VSCode
-#   copy:
-#     dest: "{{ desktop_path }}/vscode.desktop"
-#     content: |
-#       [Desktop Entry]
-#       Name=Visual Studio Code
-#       Exec=/snap/bin/code
-#       Icon=/snap/code/current/meta/gui/vscode.png
-#       Type=Application
-#       Terminal=false
-#     mode: '0755'
-#     owner: devasc
-#     group: devasc
-
-# - name: Shortcut for postman
-#   copy:
-#     dest: "{{ desktop_path }}/postman.desktop"
-#     content: |
-#       [Desktop Entry]
-#       Name=Postman
-#       Exec=/snap/bin/postman
-#       Icon=/snap/postman/current/usr/share/postman/icons/icon_128x128.png
-#       Type=Application
-#       Terminal=false
-#     mode: '0755'
-#     owner: devasc
-#     group: devasc
-
-# - name: draw.io Shortcut
-#   copy:
-#     dest: "{{ desktop_path }}/drawio.desktop"
-#     content: |
-#       [Desktop Entry]
-#       Name=draw.io
-#       Exec=/snap/bin/drawio
-#       Icon=/snap/drawio/current/meta/gui/icon.png
-#       Type=Application
-#       Terminal=false
-#     mode: '0755'
-#     owner: devasc
-#     group: devasc
-
-# - name: Shortcut for Chromium
-#   copy:
-#     dest: "{{ desktop_path }}/chromium_chromium.desktop"
-#     content: |
-#       [Desktop Entry]
-#       Name=Chromium
-#       Exec=/snap/bin/chromium
-#       Icon=/snap/chromium/current/chromium.png
-#       Type=Application
-#       Terminal=false
-#     mode: '0755'
-#     owner: devasc
-#     group: devasc
 
 
 # Setup to prevent screen from going to sleep

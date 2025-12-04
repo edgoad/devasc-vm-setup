@@ -99,14 +99,14 @@
 - name: Ensure polkit directory exists
   become: yes
   file:
-    path: /etc/polkit-1/localauthority/50-local.d
+    path: /etc/polkit-1/localauthority.conf.d/50-local.d
     state: directory
     mode: '0755'
 
 - name: Add polkit rules for color management
   become: yes
   copy:
-    dest: /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+    dest: /etc/polkit-1/localauthority.conf.d/50-local.d/45-allow-colord.pkla
     content: |
       [Allow Colord all Users]
       Identity=unix-user:*
@@ -118,7 +118,7 @@
 - name: Add polkit rules for package management
   become: yes
   copy:
-    dest: /etc/polkit-1/localauthority/50-local.d/46-allow-reporefresh.pkla
+    dest: /etc/polkit-1/localauthority.conf.d/50-local.d/46-allow-reporefresh.pkla
     content: |
       [Allow Package Management all Users]
       Identity=unix-user:*
@@ -130,7 +130,7 @@
 - name: Add polkit rules for reboot
   become: yes
   copy:
-    dest: /etc/polkit-1/localauthority/50-local.d/47-allow-reboot.pkla
+    dest: /etc/polkit-1/localauthority.conf.d/50-local.d/47-allow-reboot.pkla
     content: |
       Identity=unix-group:*
       Action=org.freedesktop.login1.reboot;org.freedesktop.login1.reboot-multiple-sessions
@@ -141,7 +141,7 @@
 - name: Add polkit rules for shutdown
   become: yes
   copy:
-    dest: /etc/polkit-1/localauthority/50-local.d/47-allow-shutdown.pkla
+    dest: /etc/polkit-1/localauthority.conf.d/50-local.d/47-allow-shutdown.pkla
     content: |
       Identity=unix-group:*
       Action=org.freedesktop.login1.power-off;org.freedesktop.login1.power-off-multiple-sessions

@@ -25,6 +25,9 @@
   copy:
     src: "{{ user_home }}/devasc-vm-setup/labs"
     dest: "{{ user_home }}"
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+    mode: '0755'
   ignore_errors: yes
 
 - name: Remove keyring files
