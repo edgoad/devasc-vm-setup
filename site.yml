@@ -3,6 +3,14 @@
   hosts: localhost
   connection: local
   become: true
+
+  vars_prompt:
+    - name: existing_user
+      prompt: "Enter your existing username"
+      private: no
+    - name: existing_user_pass
+      prompt: "Enter your existing password"
+      
   vars_files:
     - group_vars/all.yml
   roles:

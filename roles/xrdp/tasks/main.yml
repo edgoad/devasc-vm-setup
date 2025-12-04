@@ -143,14 +143,14 @@
     group: root
     mode: '0644'
 
-- name: Enhanced Ubuntu 20+ mode: update XRDP port/vsock
+- name: Enhanced Ubuntu 20+ mode- update XRDP port/vsock
   lineinfile:
     path: /etc/xrdp/xrdp.ini
     regexp: '^port=.*'
     line: 'port=vsock://-1:3389'
     backup: yes
 
-- name: Enhanced Ubuntu 20+ mode: disable use_vsock after port update
+- name: Enhanced Ubuntu 20+ mode- disable use_vsock after port update
   lineinfile:
     path: /etc/xrdp/xrdp.ini
     regexp: '^use_vsock=.*'

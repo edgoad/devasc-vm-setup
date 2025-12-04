@@ -1,9 +1,9 @@
 ---
 hostname: labvm
-existing_user: devasc
-existing_user_pass: Cisco123!
-ciscouser: devasc
-ciscopass: Cisco123!
+# existing_user: devasc
+# existing_user_pass: Cisco123!
+ciscouser: {{ existing_user }}
+ciscopass: {{ existing_user_pass }}
 ansible_become_password: "{{ existing_user_pass }}"
 user_home: "/home/{{ existing_user }}"
 desktop_path: "{{ user_home }}/Desktop"
