@@ -1,0 +1,32 @@
+---
+
+
+# # Install mate desktop environment and set it as default
+# - name: Install MATE Desktop Environment
+#   apt:
+#     name: ubuntu-mate-desktop
+#     state: latest
+#     cache_valid_time: 3600
+#     update_cache: yes
+
+# - name: Set MATE as default session
+#   lineinfile:
+#     path: /etc/gdm3/custom.conf
+#     regexp: '^#?DefaultSession='
+#     line: 'DefaultSession=mate.desktop'
+#     insertafter: '[daemon]'
+#   notify: Restart GDM
+
+# - name: Copy mate-panel.conf to target
+#   copy:
+#     src: mate-panel.conf
+#     dest: /tmp/mate-panel.conf
+
+# - name: Load MATE panel configuration
+#   ignore_errors: yes
+#   command: dconf load /org/mate/panel/ < /tmp/mate-panel.conf
+
+# - name: Restart MATE panel
+#   command: mate-panel --replace
+#   async: 10
+#   poll: 0

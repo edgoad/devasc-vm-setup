@@ -44,8 +44,8 @@
   copy:
     dest: "{{ desktop_path }}/{{ item.name }}"
     content: "{{ item.content }}"
-    owner: "{{ desktop_user }}"
-    group: "{{ desktop_user }}"
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
     mode: "0755"
   loop: "{{ shortcuts }}"
 
@@ -58,7 +58,7 @@
 # IMPORTANT: Mark as trusted within the user's GNOME session
 - name: Mark shortcuts as trusted via gio
   become: true
-  become_user: "{{ desktop_user }}"
+  become_user: "{{ existing_user }}"
   environment:
     # If this runs while the user is logged in to GNOME, DISPLAY is usually set.
     # If not, you can set DISPLAY and bootstrap a session bus via dbus-launch.
@@ -181,34 +181,3 @@
       IdleAction=ignore
   notify: Restart systemd-logind
 
-
-# # Install mate desktop environment and set it as default
-# - name: Install MATE Desktop Environment
-#   apt:
-#     name: ubuntu-mate-desktop
-#     state: present
-#     cache_valid_time: 3600
-#     update_cache: yes
-#   notify: Restart GDM
-
-# - name: Set MATE as default session
-#   lineinfile:
-#     path: /etc/gdm3/custom.conf
-#     regexp: '^#?DefaultSession='
-#     line: 'DefaultSession=mate.desktop'
-#     insertafter: '[daemon]'
-#   notify: Restart GDM
-
-# - name: Copy mate-panel.conf to target
-#   copy:
-#     src: mate-panel.conf
-#     dest: /tmp/mate-panel.conf
-
-# - name: Load MATE panel configuration
-#   ignore_errors: yes
-#   command: dconf load /org/mate/panel/ < /tmp/mate-panel.conf
-
-# - name: Restart MATE panel
-#   command: mate-panel --replace
-#   async: 10
-#   poll: 0

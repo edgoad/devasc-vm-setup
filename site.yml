@@ -8,9 +8,11 @@
     - name: existing_user
       prompt: "Enter your existing username"
       private: no
+      default: "devasc"
     - name: existing_user_pass
       prompt: "Enter your existing password"
-      
+      default: "Cisco123!"
+
   vars_files:
     - group_vars/all.yml
   roles:
@@ -20,4 +22,5 @@
     - desktop
     - netplan
     - api_simulator
+    # - mate
     # - xrdp

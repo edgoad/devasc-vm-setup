@@ -112,7 +112,6 @@
           - tcptrace
           - tcptraceroute
           - telnet
-          - ubuntu-mate-desktop
           - vim
           - vmfs-tools
           - wget
@@ -199,22 +198,22 @@
         src: "{{ user_home }}/devasc-vm-setup/labs"
         dest: "{{ user_home }}"
 
-    # Install mate desktop environment and set it as default
-    - name: Install MATE Desktop Environment
-      apt:
-        name: ubuntu-mate-desktop
-        state: present
-        cache_valid_time: 3600
-        update_cache: yes
-      notify: Restart GDM
+    # # Install mate desktop environment and set it as default
+    # - name: Install MATE Desktop Environment
+    #   apt:
+    #     name: ubuntu-mate-desktop
+    #     state: present
+    #     cache_valid_time: 3600
+    #     update_cache: yes
+    #   notify: Restart GDM
 
-    - name: Set MATE as default session
-      lineinfile:
-        path: /etc/gdm3/custom.conf
-        regexp: '^#?DefaultSession='
-        line: 'DefaultSession=mate.desktop'
-        insertafter: '[daemon]'
-      notify: Restart GDM
+    # - name: Set MATE as default session
+    #   lineinfile:
+    #     path: /etc/gdm3/custom.conf
+    #     regexp: '^#?DefaultSession='
+    #     line: 'DefaultSession=mate.desktop'
+    #     insertafter: '[daemon]'
+    #   notify: Restart GDM
 
     # Create desktop shortcuts
     - name: Create desktop shortcut for Firefox

@@ -47,7 +47,6 @@
       - tcptrace
       - tcptraceroute
       - telnet
-      - ubuntu-mate-desktop
       - vim
       - vmfs-tools
       - wget

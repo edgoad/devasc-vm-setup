@@ -1,109 +1,122 @@
 ---
-- name: Fail if not root
-  ansible.builtin.assert:
-    that:
-      - ansible_user_id == 'root'
-    fail_msg: "This playbook must be run as root."
-    success_msg: "Running as root!"
-
-- name: Install kernel tools
+- name: Install kernel and XRDP tools
+  become: yes
   apt:
     name:
-      - linux-tools-virtual{{ hwe | default('') }}
-      - linux-cloud-tools-virtual{{ hwe | default('') }}
-    state: present
+      - xrdp
+      - linux-tools-virtual
+      - linux-cloud-tools-virtual
+    state: latest
+    cache_valid_time: 3600
     update_cache: yes
 
-- name: Install XRDP
-  apt:
-    name: xrdp
-    state: present
-    update_cache: yes
 
-- name: Stop XRDP Services
-  systemd:
+- name: Stop xrdp services for configuration
+  become: yes
+  service:
     name: "{{ item }}"
     state: stopped
   loop:
     - xrdp
     - xrdp-sesman
 
-- name: Update /etc/xrdp/xrdp.ini settings
-  lineinfile:
+- name: Set XRDP config- use vsock transport
+  become: yes
+  replace:
     path: /etc/xrdp/xrdp.ini
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    backup: yes
-  with_items:
-    - { regexp: '^use_vsock=.*', line: 'use_vsock=true' }
-    - { regexp: '^security_layer=.*', line: 'security_layer=rdp' }
-    - { regexp: '^crypt_level=.*', line: 'crypt_level=none' }
-    - { regexp: '^bitmap_compression=.*', line: 'bitmap_compression=false' }
+    regexp: 'use_vsock=false'
+    replace: 'use_vsock=true'
 
-- name: Create startubuntu.sh script
+- name: Set XRDP config- security layer to rdp
+  become: yes
+  replace:
+    path: /etc/xrdp/xrdp.ini
+    regexp: 'security_layer=negotiate'
+    replace: 'security_layer=rdp'
+
+- name: Set XRDP config- crypt level to none
+  become: yes
+  replace:
+    path: /etc/xrdp/xrdp.ini
+    regexp: 'crypt_level=high'
+    replace: 'crypt_level=none'
+
+- name: Set XRDP config- disable bitmap compression
+  become: yes
+  replace:
+    path: /etc/xrdp/xrdp.ini
+    regexp: 'bitmap_compression=true'
+    replace: 'bitmap_compression=false'
+
+- name: Create /etc/xrdp/startubuntu.sh if not exists
+  become: yes
   copy:
     dest: /etc/xrdp/startubuntu.sh
+    owner: root
+    group: root
+    mode: '0755'
     content: |
       #!/bin/sh
       export GNOME_SHELL_SESSION_MODE=ubuntu
       export XDG_CURRENT_DESKTOP=ubuntu:GNOME
       exec /etc/xrdp/startwm.sh
-    mode: '0755'
-    owner: root
-    group: root
-  when: not ansible_facts['distribution'] == "CentOS" # adjust if you need!
 
-- name: Set startubuntu in /etc/xrdp/sesman.ini
-  lineinfile:
+- name: Replace startwm with startubuntu in sesman.ini
+  become: yes
+  replace:
     path: /etc/xrdp/sesman.ini
     regexp: 'startwm'
-    line: 'startubuntu'
+    replace: 'startubuntu'
 
-- name: Rename redirected drives
-  lineinfile:
+- name: Rename redirected drives in sesman.ini
+  become: yes
+  replace:
     path: /etc/xrdp/sesman.ini
-    regexp: '^FuseMountName=.*'
-    line: 'FuseMountName=shared-drives'
+    regexp: 'FuseMountName=thinclient_drives'
+    replace: 'FuseMountName=shared-drives'
 
-- name: Change allowed_users in /etc/X11/Xwrapper.config
-  lineinfile:
+- name: Set allowed_users to anybody in Xwrapper.config
+  become: yes
+  replace:
     path: /etc/X11/Xwrapper.config
-    regexp: '^allowed_users=.*'
-    line: 'allowed_users=anybody'
-    backup: yes
+    regexp: 'allowed_users=console'
+    replace: 'allowed_users=anybody'
 
 - name: Blacklist vmw_vsock_vmci_transport
-  copy:
-    dest: /etc/modprobe.d/blacklist_vmw_vsock_vmci_transport.conf
-    content: |
-      blacklist vmw_vsock_vmci_transport
-    owner: root
-    group: root
-    mode: '0644'
+  become: yes
+  lineinfile:
+    path: /etc/modprobe.d/blacklist_vmw_vsock_vmci_transport.conf
+    line: 'blacklist vmw_vsock_vmci_transport'
+    create: yes
 
-- name: Ensure hv_sock gets loaded
-  copy:
-    dest: /etc/modules-load.d/hv_sock.conf
-    content: "hv_sock\n"
-    owner: root
-    group: root
-    mode: '0644'
+- name: Ensure hv_sock is loaded
+  become: yes
+  lineinfile:
+    path: /etc/modules-load.d/hv_sock.conf
+    line: 'hv_sock'
+    create: yes
 
-- name: Configure colord polkit
+- name: Ensure polkit directory exists
+  become: yes
+  file:
+    path: /etc/polkit-1/localauthority/50-local.d
+    state: directory
+    mode: '0755'
+
+- name: Add polkit rules for color management
+  become: yes
   copy:
     dest: /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
     content: |
       [Allow Colord all Users]
       Identity=unix-user:*
-      Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+      Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile
       ResultAny=no
       ResultInactive=no
       ResultActive=yes
-    owner: root
-    group: root
-    mode: '0644'
 
-- name: Configure package management polkit
+- name: Add polkit rules for package management
+  become: yes
   copy:
     dest: /etc/polkit-1/localauthority/50-local.d/46-allow-reporefresh.pkla
     content: |
@@ -113,11 +126,9 @@
       ResultAny=yes
       ResultInactive=yes
       ResultActive=yes
-    owner: root
-    group: root
-    mode: '0644'
 
-- name: Configure reboot polkit
+- name: Add polkit rules for reboot
+  become: yes
   copy:
     dest: /etc/polkit-1/localauthority/50-local.d/47-allow-reboot.pkla
     content: |
@@ -126,11 +137,9 @@
       ResultAny=yes
       ResultActive=no
       ResultInactive=no
-    owner: root
-    group: root
-    mode: '0644'
 
-- name: Configure shutdown polkit
+- name: Add polkit rules for shutdown
+  become: yes
   copy:
     dest: /etc/polkit-1/localauthority/50-local.d/47-allow-shutdown.pkla
     content: |
@@ -139,27 +148,28 @@
       ResultAny=yes
       ResultActive=no
       ResultInactive=no
-    owner: root
-    group: root
-    mode: '0644'
 
-- name: Enhanced Ubuntu 20+ mode- update XRDP port/vsock
-  lineinfile:
+- name: Update for Enhanced mode in Ubuntu 20
+  become: yes
+  replace:
     path: /etc/xrdp/xrdp.ini
-    regexp: '^port=.*'
-    line: 'port=vsock://-1:3389'
-    backup: yes
+    regexp: 'port=3389'
+    replace: 'port=vsock://-1:3389'
 
-- name: Enhanced Ubuntu 20+ mode- disable use_vsock after port update
-  lineinfile:
+- name: Reset use_vsock to false in xrdp.ini
+  become: yes
+  replace:
     path: /etc/xrdp/xrdp.ini
-    regexp: '^use_vsock=.*'
-    line: 'use_vsock=false'
-    backup: yes
+    regexp: 'use_vsock=true'
+    replace: 'use_vsock=false'
+
+
+- name: Reload systemd manager configuration
+  systemd:
+    daemon_reload: yes
 
 - name: Reload and start xrdp service
+  become: yes
   systemd:
     name: xrdp
     state: restarted
-    daemon_reload: yes
-    enabled: yes
