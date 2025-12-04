@@ -39,89 +39,124 @@
     group: devasc
     mode: '0755'
 
-- name: Shortcut for Labs Folder
-  copy:
-    dest: "{{ desktop_path }}/labs.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Labs
-      Icon=folder
-      Type=Link
-      URL={{ user_home }}/labs
-      Icon=user-bookmarks
-    mode: '0755'
-    owner: devasc
-    group: devasc
 
-- name: Shortcut for Terminal
+- name: Install .desktop files
   copy:
-    dest: "{{ desktop_path }}/terminal.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Terminal
-      Exec=gnome-terminal
-      Icon=utilities-terminal
-      Type=Application
-      Terminal=false
-    mode: '0755'
-    owner: devasc
-    group: devasc
+    dest: "{{ desktop_path }}/{{ item.name }}"
+    content: "{{ item.content }}"
+    owner: "{{ desktop_user }}"
+    group: "{{ desktop_user }}"
+    mode: "0755"
+  loop: "{{ shortcuts }}"
 
-- name: Shortcut for VSCode
-  copy:
-    dest: "{{ desktop_path }}/vscode.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Visual Studio Code
-      Exec=/snap/bin/code
-      Icon=/snap/code/current/meta/gui/vscode.png
-      Type=Application
-      Terminal=false
-    mode: '0755'
-    owner: devasc
-    group: devasc
+- name: Make .desktop files executable (defensive)
+  file:
+    path: "{{ desktop_path }}/{{ item.name }}"
+    mode: "u+x,g+x,o+x"
+  loop: "{{ shortcuts }}"
 
-- name: Shortcut for postman
-  copy:
-    dest: "{{ desktop_path }}/postman.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Postman
-      Exec=/snap/bin/postman
-      Icon=/snap/postman/current/usr/share/postman/icons/icon_128x128.png
-      Type=Application
-      Terminal=false
-    mode: '0755'
-    owner: devasc
-    group: devasc
+# IMPORTANT: Mark as trusted within the user's GNOME session
+- name: Mark shortcuts as trusted via gio
+  become: true
+  become_user: "{{ desktop_user }}"
+  environment:
+    # If this runs while the user is logged in to GNOME, DISPLAY is usually set.
+    # If not, you can set DISPLAY and bootstrap a session bus via dbus-launch.
+    DISPLAY: ":0"
+  shell: |
+    dbus-launch gio set "{{ desktop_path }}/{{ item.name }}" "metadata::trusted" true
+  loop: "{{ shortcuts }}"
+  changed_when: true
+  register: gio_trust
 
-- name: draw.io Shortcut
-  copy:
-    dest: "{{ desktop_path }}/drawio.desktop"
-    content: |
-      [Desktop Entry]
-      Name=draw.io
-      Exec=/snap/bin/drawio
-      Icon=/snap/drawio/current/meta/gui/icon.png
-      Type=Application
-      Terminal=false
-    mode: '0755'
-    owner: devasc
-    group: devasc
+- name: Debug gio output (optional)
+  debug:
+    var: gio_trust
 
-- name: Shortcut for Chromium
-  copy:
-    dest: "{{ desktop_path }}/chromium_chromium.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Chromium
-      Exec=/snap/bin/chromium
-      Icon=/snap/chromium/current/chromium.png
-      Type=Application
-      Terminal=false
-    mode: '0755'
-    owner: devasc
-    group: devasc
+
+# - name: Shortcut for Labs Folder
+#   copy:
+#     dest: "{{ desktop_path }}/labs.desktop"
+#     content: |
+#       [Desktop Entry]
+#       Name=Labs
+#       Icon=folder
+#       Type=Link
+#       URL={{ user_home }}/labs
+#       Icon=user-bookmarks
+#     mode: '0755'
+#     owner: devasc
+#     group: devasc
+
+# - name: Shortcut for Terminal
+#   copy:
+#     dest: "{{ desktop_path }}/terminal.desktop"
+#     content: |
+#       [Desktop Entry]
+#       Name=Terminal
+#       Exec=gnome-terminal
+#       Icon=utilities-terminal
+#       Type=Application
+#       Terminal=false
+#     mode: '0755'
+#     owner: devasc
+#     group: devasc
+
+# - name: Shortcut for VSCode
+#   copy:
+#     dest: "{{ desktop_path }}/vscode.desktop"
+#     content: |
+#       [Desktop Entry]
+#       Name=Visual Studio Code
+#       Exec=/snap/bin/code
+#       Icon=/snap/code/current/meta/gui/vscode.png
+#       Type=Application
+#       Terminal=false
+#     mode: '0755'
+#     owner: devasc
+#     group: devasc
+
+# - name: Shortcut for postman
+#   copy:
+#     dest: "{{ desktop_path }}/postman.desktop"
+#     content: |
+#       [Desktop Entry]
+#       Name=Postman
+#       Exec=/snap/bin/postman
+#       Icon=/snap/postman/current/usr/share/postman/icons/icon_128x128.png
+#       Type=Application
+#       Terminal=false
+#     mode: '0755'
+#     owner: devasc
+#     group: devasc
+
+# - name: draw.io Shortcut
+#   copy:
+#     dest: "{{ desktop_path }}/drawio.desktop"
+#     content: |
+#       [Desktop Entry]
+#       Name=draw.io
+#       Exec=/snap/bin/drawio
+#       Icon=/snap/drawio/current/meta/gui/icon.png
+#       Type=Application
+#       Terminal=false
+#     mode: '0755'
+#     owner: devasc
+#     group: devasc
+
+# - name: Shortcut for Chromium
+#   copy:
+#     dest: "{{ desktop_path }}/chromium_chromium.desktop"
+#     content: |
+#       [Desktop Entry]
+#       Name=Chromium
+#       Exec=/snap/bin/chromium
+#       Icon=/snap/chromium/current/chromium.png
+#       Type=Application
+#       Terminal=false
+#     mode: '0755'
+#     owner: devasc
+#     group: devasc
 
 
 # Setup to prevent screen from going to sleep

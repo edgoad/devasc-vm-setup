@@ -1,0 +1,51 @@
+---
+desktop_path: "{{ user_home }}/Desktop"
+shortcuts:
+  - name: terminal.desktop
+    content: |
+      [Desktop Entry]
+      Name=Terminal
+      Exec=gnome-terminal
+      Icon=utilities-terminal
+      Type=Application
+      Terminal=false
+  - name: labs.desktop
+    content: |
+      [Desktop Entry]
+      Name=Labs
+      Icon=folder
+      Type=Link
+      URL={{ user_home }}/labs
+      Icon=user-bookmarks
+  - name: vscode.desktop
+    content: |
+      [Desktop Entry]
+      Name=Visual Studio Code
+      Exec=/snap/bin/code
+      Icon=/snap/code/current/meta/gui/vscode.png
+      Type=Application
+      Terminal=false
+  - name: postman.desktop
+    content: |
+      [Desktop Entry]
+      Name=Postman
+      Exec=/snap/bin/postman
+      Icon=/snap/postman/current/usr/share/postman/icons/icon_128x128.png
+      Type=Application
+      Terminal=false
+  - name: drawio.desktop
+    content: |
+      [Desktop Entry]
+      Name=draw.io
+      Exec=/snap/bin/drawio
+      Icon=/snap/drawio/current/meta/gui/icon.png
+      Type=Application
+      Terminal=false
+  - name: chromium_chromium.desktop
+    content: |
+      [Desktop Entry]
+      Name=Chromium
+      Exec=/snap/bin/chromium
+      Icon=/snap/chromium/current/chromium.png
+      Type=Application
+      Terminal=false
