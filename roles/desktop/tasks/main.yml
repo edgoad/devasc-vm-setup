@@ -30,23 +30,6 @@
     group: "{{ existing_user }}"
     mode: '0644'
 
-# Install mate desktop environment and set it as default
-- name: Install MATE Desktop Environment
-  apt:
-    name: ubuntu-mate-desktop
-    state: present
-    cache_valid_time: 3600
-    update_cache: yes
-  notify: Restart GDM
-
-- name: Set MATE as default session
-  lineinfile:
-    path: /etc/gdm3/custom.conf
-    regexp: '^#?DefaultSession='
-    line: 'DefaultSession=mate.desktop'
-    insertafter: '[daemon]'
-  notify: Restart GDM
-
 # Create desktop shortcuts
 - name: Ensure Desktop folder exists
   file:
@@ -164,16 +147,33 @@
   notify: Restart systemd-logind
 
 
-- name: Copy mate-panel.conf to target
-  copy:
-    src: mate-panel.conf
-    dest: /tmp/mate-panel.conf
+# # Install mate desktop environment and set it as default
+# - name: Install MATE Desktop Environment
+#   apt:
+#     name: ubuntu-mate-desktop
+#     state: present
+#     cache_valid_time: 3600
+#     update_cache: yes
+#   notify: Restart GDM
 
-- name: Load MATE panel configuration
-  ignore_errors: yes
-  command: dconf load /org/mate/panel/ < /tmp/mate-panel.conf
+# - name: Set MATE as default session
+#   lineinfile:
+#     path: /etc/gdm3/custom.conf
+#     regexp: '^#?DefaultSession='
+#     line: 'DefaultSession=mate.desktop'
+#     insertafter: '[daemon]'
+#   notify: Restart GDM
 
-- name: Restart MATE panel
-  command: mate-panel --replace
-  async: 10
-  poll: 0
+# - name: Copy mate-panel.conf to target
+#   copy:
+#     src: mate-panel.conf
+#     dest: /tmp/mate-panel.conf
+
+# - name: Load MATE panel configuration
+#   ignore_errors: yes
+#   command: dconf load /org/mate/panel/ < /tmp/mate-panel.conf
+
+# - name: Restart MATE panel
+#   command: mate-panel --replace
+#   async: 10
+#   poll: 0
