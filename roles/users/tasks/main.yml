@@ -13,6 +13,14 @@
     group: root
     mode: '0440'
 
+- name: Ensure user is a member of each group (preserve existing)
+  ansible.builtin.user:
+    name: "{{ existing_user }}"
+    groups: "{{ item }}"
+    append: true
+    state: present
+  loop: "{{ user_groups }}"
+  
 - name: Ensure Desktop folder exists
   file:
     path: "{{ desktop_path }}"
