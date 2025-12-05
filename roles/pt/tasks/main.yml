@@ -1,4 +1,5 @@
 ---
+# install information per https://fr0stb1rd.gitlab.io/posts/cisco-packet-tracer-9-0-0-installation-on-any-linux/
 - name: Download .deb file
   ansible.builtin.get_url:
     url: "https://archive.org/download/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb"

@@ -83,7 +83,7 @@
 
 # Update favorite apps in GNOME
 - name: Update favorite apps in GNOME
-  command: gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'chromium_chromium.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'code_code.desktop', 'drawio_drawio.desktop']"
+  command: gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'chromium_chromium.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'code_code.desktop', 'drawio_drawio.desktop', 'CiscoPacketTracer-9.0.0.desktop']"
   become: false
 
 

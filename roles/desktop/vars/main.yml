@@ -9,14 +9,14 @@ shortcuts:
       Icon=utilities-terminal
       Type=Application
       Terminal=false
-  # - name: labs.desktop
-  #   content: |
-  #     [Desktop Entry]
-  #     Name=Labs
-  #     Icon=folder
-  #     Type=Link
-  #     URL={{ user_home }}/labs
-  #     Icon=user-bookmarks
+  - name: CiscoPacketTracer-9.0.0.desktop
+    content: |
+      [Desktop Entry]
+      Name=Cisco Packet Tracer 9.0.0
+      Icon=Cisco_Packet_Tracer_9.0.0
+      Type=Application
+      Exec=/opt/pt/packettracer.AppImage %f
+      Terminal=false
   - name: vscode.desktop
     content: |
       [Desktop Entry]
