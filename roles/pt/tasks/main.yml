@@ -1,14 +1,4 @@
 ---
-- name: Download and install a .deb package on Ubuntu 24
-  hosts: ubuntu_hosts
-  become: true
-  vars:
-    deb_url: "https://example.com/path/to/package.deb"
-    deb_file: "/tmp/package.deb"
-
-  tasks:
-
-
 - name: Download .deb file
   ansible.builtin.get_url:
     url: "https://archive.org/download/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb"
