@@ -19,8 +19,9 @@
     - common
     - users
     - packages
+    - pt
     - desktop
     - netplan
     - api_simulator
     # - mate
-    # - xrdp
+    - xrdp

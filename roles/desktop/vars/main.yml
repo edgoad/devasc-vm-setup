@@ -9,14 +9,14 @@ shortcuts:
       Icon=utilities-terminal
       Type=Application
       Terminal=false
-  - name: labs.desktop
-    content: |
-      [Desktop Entry]
-      Name=Labs
-      Icon=folder
-      Type=Link
-      URL={{ user_home }}/labs
-      Icon=user-bookmarks
+  # - name: labs.desktop
+  #   content: |
+  #     [Desktop Entry]
+  #     Name=Labs
+  #     Icon=folder
+  #     Type=Link
+  #     URL={{ user_home }}/labs
+  #     Icon=user-bookmarks
   - name: vscode.desktop
     content: |
       [Desktop Entry]

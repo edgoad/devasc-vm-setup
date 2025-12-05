@@ -39,7 +39,6 @@
     group: devasc
     mode: '0755'
 
-
 - name: Install .desktop files
   copy:
     dest: "{{ desktop_path }}/{{ item.name }}"
@@ -74,10 +73,18 @@
     var: gio_trust
 
 
+- name: Create symlink on desktop pointing to labs
+  ansible.builtin.file:
+    src: "{{ user_home }}/labs"
+    dest: "{{ desktop_path }}/labs"
+    state: link
+    owner: "{{ existing_user }}"
+    group: "{{ existing_user }}"
+
 # Update favorite apps in GNOME
 - name: Update favorite apps in GNOME
   command: gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'chromium_chromium.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'code_code.desktop', 'drawio_drawio.desktop']"
-
+  become: false
 
 
 # Setup to prevent screen from going to sleep
