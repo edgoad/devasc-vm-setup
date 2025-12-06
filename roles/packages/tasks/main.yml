@@ -19,6 +19,7 @@
       - ca-certificates
       - containerd.io
       - curl
+      - dbus-x11
       - dconf-cli
       - docker-ce
       - docker-ce-cli

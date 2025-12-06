@@ -6,8 +6,20 @@ Create a Hyper-V VM
  - Min 4GB RAM
  - Min 2 CPU
 
-Create user accound `devasc` with password of `Cisco123!`
-Set account to autologin without password
+## To start:
+
+1. Run the following in PowerShell
+
+```
+Invoke-WebRequest "https://raw.githubusercontent.com/edgoad/ITVMs/master/IT385_DevASC/01-MainSetup.ps1" -OutFile $env:TEMP\01-MainSetup.ps1
+."$env:Temp\01-MainSetup.ps1"
+```
+
+    reboot and rerun the script when prompted
+
+2. Install Ubuntu
+    Create user accound `devasc` with password of `Cisco123!`
+
 
 ## Configure Ubuntu
 
@@ -18,14 +30,24 @@ sudo apt update ; sudo apt upgrade -y ; sudo apt autoremove
 sudo apt install ansible git -y
 git clone https://www.github.com/egoad/devasc-vm-setup.git
 ```
+
 ## Run Ansible script
 
 Borrowed from https://github.com/epiecs/devasc-vm-setup
 
 Run the following commands to download and run the devasc playbook
+
 ```shell
 ansible-playbook devasc-vm-setup/site.yml
 ```
+
+## Post automation
+
+1. Make chromium the default browser
+2. Set http://library.demo.local as the default browser
+3. Confirm keyring isnt prompting for password
+4. Confirm VMs are starting at boot
+
 
 # Unsure items
 Packet Tracer
@@ -49,20 +71,3 @@ firewall rules
 
 
 
-This repository uses a role-based Ansible layout instead of a single large playbook.
-
-How it's organized:
-- site.yml - top-level play that composes roles
-- roles/common - hostname, common defaults and handlers
-- roles/users - groups, sudoers, user-related items
-- roles/packages - apt, snap, apt keys, repositories
-- roles/desktop - desktop environment, gsettings, shortcuts, VSCode config
-- roles/netplan - network configuration (uses template)
-- roles/api_simulator - API-SIMULATOR service setup
-
-Run:
-- ansible-playbook site.yml -K
-
-Tips:
-- Use group_vars/all.yml or pass -e to override defaults like hostname, user_home, ubuntuversion.
-- Run portions by tags or by limiting roles: ansible-playbook site.yml --tags "packages" or remove roles you don't want from site.yml temporarily.
