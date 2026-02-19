@@ -10,7 +10,7 @@
 
 - name: Install ansible.cfg
   ansible.builtin.copy:
-    src: files/ansible.cfg
+    src: ansible.cfg
     dest: "{{ cfg_path }}"
     owner: root
     group: root
@@ -19,7 +19,7 @@
     backup: true
 - name: Install hosts inventory file
   ansible.builtin.copy:
-    src: files/hosts
+    src: hosts
     dest: "{{ hosts_path }}"
     owner: root
     group: root
