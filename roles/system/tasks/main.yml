@@ -1,0 +1,50 @@
+---
+# setup ansible configuration for the user
+- name: Ensure /etc/ansible exists
+  ansible.builtin.file:
+    path: "{{ etc_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install ansible.cfg
+  ansible.builtin.copy:
+    src: files/ansible.cfg
+    dest: "{{ cfg_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: "{{ overwrite_existing }}"
+    backup: true
+- name: Install hosts inventory file
+  ansible.builtin.copy:
+    src: files/hosts
+    dest: "{{ hosts_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: "{{ overwrite_existing }}"
+    backup: true
+
+
+# Setup ssh authentication for the user
+- name: Ensure /etc/ssh/ssh_config exists
+  ansible.builtin.file:
+    path: "/etc/ssh/ssh_config"
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add (or update) global Host * block for legacy KEX and RSA
+  ansible.builtin.blockinfile:
+    path: "/etc/ssh/ssh_config"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: legacy ssh algorithms for lab"
+    backup: true
+    create: true
+    block: |
+      Host *
+          KexAlgorithms +diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1
+          HostkeyAlgorithms +ssh-rsa
+          PubkeyAcceptedAlgorithms +ssh-rsa
