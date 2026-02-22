@@ -1,0 +1,6 @@
+---
+- name: Restart xrdp service
+  become: yes
+  systemd:
+    name: xrdp
+    state: restarted

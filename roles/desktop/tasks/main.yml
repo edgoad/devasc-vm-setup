@@ -1,8 +1,16 @@
 ---
+- name: Check if VS Code Python extension is installed
+  become: false
+  become_user: "{{ existing_user }}"
+  shell: code --list-extensions 2>/dev/null | grep -i "ms-python.python" || true
+  register: vscode_extension_check
+  changed_when: false
+
 - name: Install VS Code extension(s) for devasc (as user)
   become: false
   become_user: "{{ existing_user }}"
   command: code --install-extension ms-python.python
+  when: vscode_extension_check.stdout == ""
   ignore_errors: yes
 
 - name: Ensure VS Code settings directory exists
@@ -55,6 +63,17 @@
   loop: "{{ shortcuts }}"
 
 # IMPORTANT: Mark as trusted within the user's GNOME session
+- name: Check if shortcuts are already trusted via gio
+  become: true
+  become_user: "{{ existing_user }}"
+  environment:
+    DISPLAY: ":0"
+  shell: |
+    dbus-launch gio get "{{ desktop_path }}/{{ item.name }}" "metadata::trusted" 2>/dev/null || echo "not-set"
+  loop: "{{ shortcuts }}"
+  register: gio_trust_check
+  changed_when: false
+
 - name: Mark shortcuts as trusted via gio
   become: true
   become_user: "{{ existing_user }}"
@@ -63,14 +82,14 @@
     # If not, you can set DISPLAY and bootstrap a session bus via dbus-launch.
     DISPLAY: ":0"
   shell: |
-    dbus-launch gio set "{{ desktop_path }}/{{ item.name }}" "metadata::trusted" true
-  loop: "{{ shortcuts }}"
-  changed_when: true
+    dbus-launch gio set "{{ desktop_path }}/{{ item[0].name }}" "metadata::trusted" true
+  loop: "{{ shortcuts | zip(gio_trust_check.results) | list }}"
+  when: "'true' not in item[1].stdout"
   register: gio_trust
 
-- name: Debug gio output (optional)
-  debug:
-    var: gio_trust
+# - name: Debug gio output (optional)
+#   debug:
+#     var: gio_trust
 
 
 - name: Create symlink on desktop pointing to labs
@@ -82,23 +101,51 @@
     group: "{{ existing_user }}"
 
 # Update favorite apps in GNOME
+- name: Check current favorite apps in GNOME
+  become: false
+  shell: gsettings get org.gnome.shell favorite-apps
+  register: current_favorite_apps
+  changed_when: false
+
 - name: Update favorite apps in GNOME
   command: gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'chromium_chromium.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'code_code.desktop', 'drawio_drawio.desktop', 'CiscoPacketTracer-9.0.0.desktop']"
   become: false
+  when: "current_favorite_apps.stdout != \"['firefox_firefox.desktop', 'chromium_chromium.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'code_code.desktop', 'drawio_drawio.desktop', 'CiscoPacketTracer-9.0.0.desktop']\""
 
 
 # Setup to prevent screen from going to sleep
+- name: Check GNOME idle timeout setting
+  become: false
+  shell: sudo -u devasc dbus-launch gsettings get org.gnome.desktop.session idle-delay 2>/dev/null || echo "uint32 60000"
+  register: gnome_idle_timeout
+  changed_when: false
+
 - name: Disable GNOME idle timeout
   command: >
     sudo -u devasc dbus-launch gsettings set org.gnome.desktop.session idle-delay 0
+  when: "gnome_idle_timeout.stdout.strip() != 'uint32 0'"
+
+- name: Check GNOME power sleep on AC setting
+  become: false
+  shell: sudo -u devasc dbus-launch gsettings get org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 2>/dev/null || echo "'nothing'"
+  register: gnome_sleep_ac
+  changed_when: false
 
 - name: Disable GNOME power sleep on AC
   command: >
     sudo -u devasc dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+  when: "'nothing' not in gnome_sleep_ac.stdout"
+
+- name: Check GNOME power sleep on battery setting
+  become: false
+  shell: sudo -u devasc dbus-launch gsettings get org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 2>/dev/null || echo "'nothing'"
+  register: gnome_sleep_battery
+  changed_when: false
 
 - name: Disable GNOME power sleep on battery
   command: >
     sudo -u devasc dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
+  when: "'nothing' not in gnome_sleep_battery.stdout"
 
 - name: Update systemd logind.conf to ignore lid and idle
   blockinfile:
