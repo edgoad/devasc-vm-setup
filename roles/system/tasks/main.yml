@@ -2,7 +2,7 @@
 # setup ansible configuration for the user
 - name: Ensure /etc/ansible exists
   ansible.builtin.file:
-    path: "/etc/ansible"
+    path: "{{ etc_dir }}"
     state: directory
     owner: root
     group: root
@@ -11,7 +11,7 @@
 - name: Install ansible.cfg
   ansible.builtin.copy:
     src: ansible.cfg
-    dest: "/etc/ansible/ansible.cfg"
+    dest: "{{ etc_dir }}/ansible.cfg"
     owner: root
     group: root
     mode: "0644"
@@ -20,7 +20,7 @@
 - name: Install hosts inventory file
   ansible.builtin.copy:
     src: hosts
-    dest: "/etc/ansible/hosts"
+    dest: "{{ etc_dir }}/hosts"
     owner: root
     group: root
     mode: "0644"
