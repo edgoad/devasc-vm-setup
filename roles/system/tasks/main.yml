@@ -11,7 +11,7 @@
 - name: Install ansible.cfg
   ansible.builtin.copy:
     src: ansible.cfg
-    dest: "{{ cfg_path }}"
+    dest: "{{ etc_dir }}/ansible.cfg"
     owner: root
     group: root
     mode: "0644"
@@ -20,7 +20,7 @@
 - name: Install hosts inventory file
   ansible.builtin.copy:
     src: hosts
-    dest: "{{ hosts_path }}"
+    dest: "{{ etc_dir }}/hosts"
     owner: root
     group: root
     mode: "0644"

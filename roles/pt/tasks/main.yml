@@ -1,17 +1,24 @@
 ---
 # install information per https://fr0stb1rd.gitlab.io/posts/cisco-packet-tracer-9-0-0-installation-on-any-linux/
+- name: Check if Packet Tracer is already installed
+  ansible.builtin.package_facts:
+    manager: apt
+
 - name: Download .deb file
   ansible.builtin.get_url:
     url: "https://archive.org/download/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb"
     dest: "/tmp/CiscoPacketTracer_900_Ubuntu_64bit.deb"
     mode: '0644'
+  when: "'packettracer' not in ansible_facts.packages"
 
 - name: Install .deb package
   ansible.builtin.apt:
     deb: "/tmp/CiscoPacketTracer_900_Ubuntu_64bit.deb"
     state: present
+  when: "'packettracer' not in ansible_facts.packages"
 
 - name: Clean up .deb file (optional)
   ansible.builtin.file:
     path: "/tmp/CiscoPacketTracer_900_Ubuntu_64bit.deb"
     state: absent
+  when: "'packettracer' not in ansible_facts.packages"

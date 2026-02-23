@@ -11,6 +11,12 @@
     update_cache: yes
 
 
+- name: Check current use_vsock setting
+  become: yes
+  shell: grep '^use_vsock=' /etc/xrdp/xrdp.ini | head -1
+  register: vsock_setting
+  changed_when: false
+
 - name: Stop xrdp services for configuration
   become: yes
   service:
@@ -19,6 +25,7 @@
   loop:
     - xrdp
     - xrdp-sesman
+  when: "vsock_setting.stdout != 'use_vsock=true'"
 
 - name: Set XRDP config- use vsock transport
   become: yes
@@ -26,6 +33,8 @@
     path: /etc/xrdp/xrdp.ini
     regexp: 'use_vsock=false'
     replace: 'use_vsock=true'
+  when: "vsock_setting.stdout != 'use_vsock=true'"
+  notify: Restart xrdp service
 
 - name: Set XRDP config- security layer to rdp
   become: yes
@@ -33,6 +42,7 @@
     path: /etc/xrdp/xrdp.ini
     regexp: 'security_layer=negotiate'
     replace: 'security_layer=rdp'
+  notify: Restart xrdp service
 
 - name: Set XRDP config- crypt level to none
   become: yes
@@ -40,6 +50,7 @@
     path: /etc/xrdp/xrdp.ini
     regexp: 'crypt_level=high'
     replace: 'crypt_level=none'
+  notify: Restart xrdp service
 
 - name: Set XRDP config- disable bitmap compression
   become: yes
@@ -47,6 +58,7 @@
     path: /etc/xrdp/xrdp.ini
     regexp: 'bitmap_compression=true'
     replace: 'bitmap_compression=false'
+  notify: Restart xrdp service
 
 - name: Create /etc/xrdp/startubuntu.sh if not exists
   become: yes
@@ -156,20 +168,23 @@
     regexp: 'port=3389'
     replace: 'port=vsock://-1:3389'
 
+- name: Check current enhanced mode vsock setting
+  become: yes
+  shell: grep '^use_vsock=' /etc/xrdp/xrdp.ini | head -1
+  register: enhanced_vsock_setting
+  changed_when: false
+
 - name: Reset use_vsock to false in xrdp.ini
   become: yes
   replace:
     path: /etc/xrdp/xrdp.ini
     regexp: 'use_vsock=true'
     replace: 'use_vsock=false'
+  when: "enhanced_vsock_setting.stdout != 'use_vsock=false'"
+  notify: Restart xrdp service
 
 
 - name: Reload systemd manager configuration
   systemd:
     daemon_reload: yes
-
-- name: Reload and start xrdp service
-  become: yes
-  systemd:
-    name: xrdp
-    state: restarted
+  notify: Restart xrdp service
