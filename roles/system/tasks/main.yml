@@ -48,4 +48,4 @@
           KexAlgorithms +diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1
           HostkeyAlgorithms +ssh-rsa
           PubkeyAcceptedAlgorithms +ssh-rsa
-          StrictHostKeyChecking no
+          
